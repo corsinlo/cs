@@ -1,0 +1,27 @@
+# Development overrides for docker-compose
+# This file is automatically loaded in development
+version: '3.8'
+
+services:
+  backend:
+    volumes:
+      # Mount source code for hot reload in development
+      - ./backend/src:/workspace/backend/src:ro
+    environment:
+      - SPRING_PROFILES_ACTIVE=development
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+    ports:
+      - "8080:8080"
+      - "8000:8000"  # Debug port
+
+  frontend:
+    # Override for development - use dev server instead of nginx
+    build:
+      context: .
+      dockerfile: docker/frontend-dev.Dockerfile
+    command: npm run dev -- --host 0.0.0.0
+    volumes:
+      - ./frontend/src:/app/src:ro
+      - ./frontend/public:/app/public:ro
+    environment:
+      - VITE_API_URL=http://localhost:8080
